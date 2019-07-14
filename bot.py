@@ -9,12 +9,10 @@ class MyClient(discord.Client):
         print('Logged on as {0}!'.format(self.user))
 
     async def on_message(self, message):
-        # メッセージ送信者がBotだった場合は無視する
-        if message.author.bot:
-            return
-        # 「/neko」と発言したら「にゃーん」が返る処理
-        if message.content == '/neko':
-            await message.channel.send('にゃーん')
+        #botへのメンションのみ反応
+        if self.user in message.mentions: # 話しかけられたかの判定
+            reply = f'{message.author.mention} 呼んだ？' # 返信メッセージの作成
+            await message.channel.send(reply) # 返信メッセージを送信
 
-client = MyClient()
-client.run(TOKEN)
+x = MyClient()
+x.run(TOKEN)
