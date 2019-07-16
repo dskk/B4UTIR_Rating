@@ -1,5 +1,11 @@
 import discord
 
+class UserResult(): #スプシを編集するのに必要な各種リザルトデータ
+    def __init__(self, discord_account, HN, score):
+        self.id = discord_account
+        self.name = HN
+        self.score = score
+
 class MyClient(discord.Client):
 
     def error_type(self, txt_list, *score_limit): #適切なフォーマットの時はNoneを返し、それ以外の場合はケースに応じてstringをreturnする関数
@@ -35,6 +41,7 @@ class MyClient(discord.Client):
             else: 
                 reply = f'{message.author.mention} User:{txt_list[1]} Score:{txt_list[2]} で提出を受理しました！'
                 await message.channel.send(reply)
+                return UserResult(message.author.name, txt_list[1], int(txt_list[2])) #ここの第１引数をどうするかは悩み中
 
 if __name__ == '__main__':
     TOKEN = ''
