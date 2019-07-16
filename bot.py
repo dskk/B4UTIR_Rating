@@ -13,9 +13,9 @@ class MyClient(discord.Client):
         print('Logged on as {0}!'.format(self.user))
 
     async def on_message(self, message):
-        #botへのメンションのみ反応
-        #txt_list[1]か[2]の中にIR_Ratingが含まれていると無限ループしちゃうので修正が必要
-        if self.user in message.mentions: # 話しかけられたかの判定
+        if self.user in message.mentions: # botへのメンションのみ反応
+            if message.author.bot: # メッセージ送信者がBotだった場合は無視する
+                return
             txt_list = message.content.split() #スペース区切りでメンションを分割、0は必ず@IR_Rating
             errors = self.error_type(txt_list)
             if errors:
