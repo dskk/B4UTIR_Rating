@@ -22,7 +22,7 @@ class MyClient(discord.Client):
                 reply = f'{message.author.mention} {errors}'
                 await message.channel.send(reply)
             else: 
-                reply = f'{message.author.mention} User:{txt_list[1]} Score:{txt_list[2]}'
+                reply = f'{message.author.mention} User:{txt_list[1]} Score:{txt_list[2]} で提出を受理しました！'
                 await message.channel.send(reply)
 
 if __name__ == '__main__':
