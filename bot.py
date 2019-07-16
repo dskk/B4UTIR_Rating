@@ -1,13 +1,24 @@
 import discord
 
-TOKEN = ''
-with open('discord_token.txt', 'r') as f:
-    TOKEN = f.read()
-
 class MyClient(discord.Client):
 
-    def error_type(self, txt_list): #適切なフォーマットの時はNoneを返し、それ以外の場合はケースに応じてstringをreturnする関数
-        return None #これから埋める
+    def error_type(self, txt_list, *score_limit): #適切なフォーマットの時はNoneを返し、それ以外の場合はケースに応じてstringをreturnする関数
+        s = None
+        if len(txt_list) != 3:
+            s = 'Error: スペース区切りで記入してください！ 例: 「太郎 1000000」'
+        else:
+            ###スコア部分がintになっているかのチェック###
+            try:
+                score = int(txt_list[2])
+            except ValueError:
+                return 'Error: スコア部分が整数以外の値になっています！ 例: 「太郎 1000000」'
+            ###ここまでtry-except、以下if文###
+            if score < 0:
+                s = 'Error: スコア部分が整数以外の値になっています！ 例: 「太郎 1000000」'
+            elif score_limit and score > score_limit:
+                s = 'Error: スコアが理論値を超えています！すごい！'
+
+        return s #これから埋める
 
     async def on_ready(self):
         print('Logged on as {0}!'.format(self.user))
@@ -26,5 +37,8 @@ class MyClient(discord.Client):
                 await message.channel.send(reply)
 
 if __name__ == '__main__':
+    TOKEN = ''
+    with open('discord_token.txt', 'r') as f:
+        TOKEN = f.read()
     x = MyClient()
     x.run(TOKEN)
