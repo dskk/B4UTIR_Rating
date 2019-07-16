@@ -43,7 +43,9 @@ class MyClient(discord.Client):
             else: 
                 reply = f'{message.author.mention} User:{txt_list[1]} Score:{txt_list[2]} で提出を受理しました！'
                 await message.channel.send(reply)
-                return UserResult(message.author.name, txt_list[1], int(txt_list[2])) #ここの第１引数をどうするかは悩み中
+                #return UserResult(message.author.name, txt_list[1], int(txt_list[2])) #ここの第１引数をどうするかは悩み中
+                #ここでUserResultを引数としてスプシを更新するようなpythonスクリプトを実行する構成の方が良さそう？
+                #つまりbot.pyからスプシ.pyにデータを投げるのではなくて、スプシ.pyから関数を引っ張ってきて実行する
 
 if __name__ == '__main__':
     TOKEN = ''
