@@ -1,51 +1,43 @@
 import discord
+import responder
 
-class UserResult(): #スプシを編集するのに必要な各種リザルトデータ
-    def __init__(self, discord_account, HN, score):
-        self.id = discord_account
-        self.name = HN
-        self.score = score
+class ParsedMention():
+
+    def __init__(self, message):
+        self.debug=""
+        self.message=message #未実装の内容を無理にでも抜いてきたいときにmessageそのものが必要になるので一応保存
+        self.text_properties=self.parse_text(message.content) # メンションのscore=1000000みたいなkey:valペアを保存するdict。key,valともstringのまま保存する。
+        self.attachments=message.attachments
+        #以下同様に、discordライブラリのmessageにぶら下がっているものたちを必要なだけ埋める。
+
+    def parse_text(self, mention_text): # mention_textはメンション本文(string)
+        text_properties={}
+        for line in mention_text.splitlines(): #行ごとにメンションを分解
+            if line.count("=") == 1: # [key]=[val]の形をした行は意味のある入力とみなす
+                key, val = line.split("=")
+                self.debug+="key="+key+", val="+val+"\n"
+                text_properties[key]=val #辞書に要素を追加する。もし同じkeyを持つ行が複数あった場合は後に出てきたほうで上書きされる。
+            else:
+                self.debug+="この行に情報はありません:"+line+"\n"
+        return text_properties
+
 
 class MyClient(discord.Client):
 
-    def error_type(self, txt_list, message, *score_limit): #適切なフォーマットの時はNoneを返し、それ以外の場合はケースに応じてstringをreturnする関数
-        s = None
-        if len(txt_list) != 3:
-            s = 'Error: スペース区切りで記入してください！ 例: 「太郎 1000000」'
-        else:
-            ###スコア部分がintになっているかのチェック###
-            try:
-                score = int(txt_list[2])
-            except ValueError:
-                return 'Error: スコア部分が整数以外の値になっています！ 例: 「太郎 1000000」'
-            ###ここまでtry-except、以下if文###
-            if score < 0:
-                s = 'Error: スコア部分が整数以外の値になっています！ 例: 「太郎 1000000」'
-            elif score_limit and score > score_limit:
-                s = 'Error: スコアが理論値を超えています！すごい！'
-            elif not message.attachments:
-                s = 'Error: リザルト画像を添付してメンションを送ってください！'
-
-        return s
-
     async def on_ready(self):
-        print('Logged on as {0}!'.format(self.user))
+        print(f'Logged on as {self.user}!')
 
     async def on_message(self, message):
         if self.user in message.mentions: # botへのメンションのみ反応
             if message.author.bot: # メッセージ送信者がBotだった場合は無視する
                 return
-            txt_list = message.content.split() #スペース区切りでメンションを分割、0は必ず@IR_Rating
-            errors = self.error_type(txt_list, message)
-            if errors:
-                reply = f'{message.author.mention} {errors}'
-                await message.channel.send(reply)
-            else: 
-                reply = f'{message.author.mention} User:{txt_list[1]} Score:{txt_list[2]} で提出を受理しました！'
-                await message.channel.send(reply)
-                #return UserResult(message.author.name, txt_list[1], int(txt_list[2])) #ここの第１引数をどうするかは悩み中
-                #ここでUserResultを引数としてスプシを更新するようなpythonスクリプトを実行する構成の方が良さそう？
-                #つまりbot.pyからスプシ.pyにデータを投げるのではなくて、スプシ.pyから関数を引っ張ってきて実行する
+            if "kill" in message.content:
+                await self.logout()
+                return
+            pm=ParsedMention(message)
+            print(pm.debug)
+            responder.Responder(pm)
+
 
 if __name__ == '__main__':
     TOKEN = ''
