@@ -1,1 +1,3 @@
 *.txt
+__pycache__/responder.cpython-36.pyc
+__pycache__/parsedmention.cpython-36.pyc
