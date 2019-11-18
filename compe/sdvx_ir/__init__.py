@@ -1,0 +1,1 @@
+from .compe import Compe
