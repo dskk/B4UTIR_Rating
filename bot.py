@@ -16,41 +16,55 @@ class MyClient(discord.Client):
         for guild in self.guilds: #所属guildは1つだけのはず
             for member in guild.members:
                 compe_mgr.uids.append(member.id)
-            #    print(member.id, member.name)ユーザーID一覧は以下の通り
-            #    429652694987178002 牛乳
-            #    504114263070212097 nadchu
-            #    599810351319482370 IR_Rating
+                # print(member.id, member.name)ユーザーID一覧は以下の通り
+                # 429652694987178002 牛乳
+                # 504114263070212097 nadchu
+                # 599810351319482370 IR_Rating
             for channel in guild.channels: #全所属チャンネルについて処理
-                #チャンネル1つに1つのcompe
-                compe_mgr.init_compe(channel.id) #IRのデータを持つクラスをインスタンス化
-                #print(channel.id,channel.name) #チャンネルID一覧は以下の通り
-                #599809803191058444 テキストチャンネル
-                #599809803191058445 一般
-                #599809803191058447 一般
-                #599858689368653825 test
-                #602690045044064297 gspreadサンプル
-                #602733557189836803 ir_admin
-                #602776246673473565 make_test
-                #603398450352226306 シート1
-                #633598972510076938 nadchu_test
+                compe_mgr.init_compedata(channel.id) #IRのデータを持つクラスをインスタンス化
+                # print(channel.id,channel.name) #チャンネルID一覧は以下の通り
+                # 599809803191058444 テキストチャンネル
+                # 599809803191058445 一般
+                # 599809803191058447 voice
+                # 599858689368653825 test
+                # 602690045044064297 gspreadサンプル
+                # 602733557189836803 ir_admin
+                # 602776246673473565 make_test
+                # 603398450352226306 シート1
+                # 633598972510076938 nadchu_test
         #asyncio.ensure_future(self.regular_check(60)) #定期実行タスクはバグっているので後で直す
 
     async def on_message(self, message):
-        if "kill" in message.content: #debug botを停止
+        if   message.content.startswith("kill"): #debug botを停止
+            #用例 "kill"
             await self.logout()
             return
-        elif "showall" in message.content: #debug global変数全てをprint
+        elif message.content.startswith("globals"): #debug global変数全てをprint
+            #用例 "globals"
             for k, v in globals().items():
                 print(k,":",v)
-        elif "show" in message.content: #debug 任意コードの実行
-            if len(message.content.split())!=2:
-                print("error: len=",len(message.content.split()))
-            else:
-                toshow=message.content.split()[1]
-                print(f"show {toshow}")
-                exec(f"print({toshow})")
-        elif (self.user in message.mentions) and not message.author.bot: # botへ、他の人から為されたメンション
-            await compe_mgr.get_compe(message.channel.id).hub(message)
+        elif message.content.startswith("exec"): #debug 任意コードの実行
+            #用例 "exec print("Hello world!")"
+            if len(message.content)>=5:
+                toexec=message.content[5:]
+                print(f"> exec({toexec})")
+                exec(toexec)
+        elif message.content.startswith("print"): #debug 変数名等を指定してprint
+            #用例 "print compe_mgr.uids"
+            if len(message.content)>=5:
+                toeval=message.content[5:]
+                print(f"> print({toeval})")
+                toprint=eval(toeval)
+                print(toprint)
+        elif message.content.startswith("send"): #debug 変数名等を指定してチャンネルに投下してもらう
+            #用例 "send compe_mgr.uids"
+            if len(message.content)>=5:
+                toeval=message.content[5:]
+                await message.channel.send(f"> print({toeval})")
+                tosend=eval(toeval)
+                await message.channel.send(tosend)
+        elif self.user in message.mentions and not message.author.bot: # botへ、他の人から為されたメンション
+            await compe_mgr.get_compedata(message.channel.id).hub(message)
 
     async def regular_check(self, interval): #on_readyから呼ばれる。ensure_futureによる定期実行、間隔はinterval秒。
         while True:
